@@ -5,6 +5,7 @@
 
 #include "config.h"
 #include <SPI.h>
+#include <Wire.h>
 #include "menu.cpp"
 #include "displayTime.cpp"
 #include "appTouch.cpp"
@@ -19,8 +20,8 @@
 uint32_t targetTime = 0;       // for next 1 second display update
 // uint32_t clockUpTime = 0;      // track the time the clock is displayed
 
-uint8_t hh, mm, ss, mmonth, dday; // H, M, S variables
-uint16_t yyear; // Year is 16 bit int
+//uint8_t hh, mm, ss, mmonth, dday; // H, M, S variables
+
 
 void setup() {
   //initSetup();

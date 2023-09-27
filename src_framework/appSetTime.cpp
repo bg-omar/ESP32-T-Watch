@@ -1,7 +1,8 @@
 // Set the time - no error checking, you might want to add it
 #include "config.h"
 
-uint8_t hh,  mm , ss , dday ,mmonth , yyear;
+uint8_t hh,  mm , ss , dday ,mmonth;
+uint16_t yyear; // Year is 16 bit int
 void prtTime(byte) ;
 int getTnum() ;
 
