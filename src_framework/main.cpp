@@ -2,7 +2,6 @@
 // Much of the code is based on the sample apps for the
 // T-watch that were written and copyrighted by Lewis He.
 //(Copyright (c) 2019 lewis he)
-#define APP_TIME_ZONE   1  // I am East Coast in Daylight Savings
 #include "config.h"
 #include <SPI.h>
 #include <soc/rtc.h>
@@ -20,8 +19,8 @@ typedef struct {
 
 
 static str_datetime_t g_data;
-TTGOClass *watch = nullptr;
-PCF8563_Class *rtc;
+TTGOClass *ttgo = nullptr;
+PCF8563_Class *ktrtc;
 LV_IMG_DECLARE(cat_png);
 LV_FONT_DECLARE(cat_font);
 
@@ -36,7 +35,8 @@ uint16_t yyear; // Year is 16 bit int
 void prtTime(byte) ;
 int getTnum() ;
 
-TTGOClass *ttgo = TTGOClass::getWatch();
+
+#define APP_TIME_ZONE   2 // I am East Coast in Daylight Savings
 
 const int maxApp = 7; // number of apps
 String appName[maxApp] = {"Clock", "Jupiter", "Accel", "Battery", "Touch", "Set Time", "KT"}; // app names
@@ -47,17 +47,17 @@ void jSats() {
     // Get the current info
     RTC_Date tnow = ttgo->rtc->getDateTime();
 
-    hh = tnow.hour;
-    mm = tnow.minute;
-    dday = tnow.day;
-    mmonth = tnow.month;
-    yyear = tnow.year;
+    uint8_t jshh = tnow.hour;
+    uint8_t jsmm = tnow.minute;
+    uint8_t jsdday = tnow.day;
+    uint8_t jsmmonth = tnow.month;
+    uint16_t jsyyear = tnow.year;
 
-    float tDay = dday; // Calculate the day plus fractional day
-    tDay += (hh - APP_TIME_ZONE) / 24.0;
-    tDay += mm / 1440.0;
-    int16_t tYear = yyear;
-    int8_t tMonth = mmonth;
+    float tDay = jsdday; // Calculate the day plus fractional day
+    tDay += (jshh - APP_TIME_ZONE) / 24.0;
+    tDay += jsmm / 1440.0;
+    int16_t tYear = jsyyear;
+    int8_t tMonth = jsmmonth;
 
     int16_t cYear, cMonth;
     if (tMonth < 3) {
@@ -223,11 +223,11 @@ void appSetTime() {
     // Get the current info
     RTC_Date tnow = ttgo->rtc->getDateTime();
 
-    hh = tnow.hour;
-    mm = tnow.minute;
-    dday = tnow.day;
-    mmonth = tnow.month;
-    yyear = tnow.year;
+    uint8_t sthh = tnow.hour;
+    uint8_t stmm = tnow.minute;
+    uint8_t stdday = tnow.day;
+    uint8_t stmmonth = tnow.month;
+    uint16_t styyear = tnow.year;
 
 //Set up the interface buttons
 
@@ -268,47 +268,52 @@ void appSetTime() {
 
             switch (curnum) {
                 case 1:
-                    hh = wl * 10 + hh % 10;
+                    hh = wl * 10 + sthh % 10;
                     break;
                 case 2:
-                    hh = int(hh / 10) * 10 + wl;
+                    hh = int(sthh / 10) * 10 + wl;
                     break;
                 case 3:
-                    mm = wl * 10 + mm % 10;
+                    mm = wl * 10 + stmm % 10;
                     break;
                 case 4:
-                    mm = int(mm / 10) * 10 + wl;
+                    mm = int(stmm / 10) * 10 + wl;
                     break;
             }
             while (getTnum() != -1) {}
             curnum += 1;
-            if (curnum > 4) curnum = 1;
             prtTime(curnum);
+            if (curnum > 4) wl = 13;
         }
     }
     while (getTnum() != -1) {}
-    ttgo->rtc->setDateTime(yyear, mmonth, dday, hh, mm, 0);
+    ttgo->rtc->setDateTime(styyear, stmmonth, stdday, hh, mm, 0);
     ttgo->tft->fillScreen(TFT_BLACK);
 }
 
 // prtTime will display the current selected time and highlight
 // the current digit to be updated in yellow
 void prtTime(byte digit) {
+    RTC_Date tnow = ttgo->rtc->getDateTime();
+
+    uint8_t pthh = tnow.hour;
+    uint8_t ptmm = tnow.minute;
+
     ttgo->tft->fillRect(0, 0, 100, 34, TFT_BLACK);
     if (digit == 1)   ttgo->tft->setTextColor(TFT_YELLOW);
     else   ttgo->tft->setTextColor(TFT_WHITE);
-    ttgo->tft->drawNumber(int(hh / 10), 5, 5, 2);
+    ttgo->tft->drawNumber(int(pthh / 10), 5, 5, 2);
     if (digit == 2)   ttgo->tft->setTextColor(TFT_YELLOW);
     else   ttgo->tft->setTextColor(TFT_WHITE);
-    ttgo->tft->drawNumber(hh % 10, 25, 5, 2);
+    ttgo->tft->drawNumber(pthh % 10, 25, 5, 2);
     ttgo->tft->setTextColor(TFT_WHITE);
     ttgo->tft->drawString(":",  45, 5, 2);
     if (digit == 3)   ttgo->tft->setTextColor(TFT_YELLOW);
     else   ttgo->tft->setTextColor(TFT_WHITE);
-    ttgo->tft->drawNumber(int(mm / 10), 65 , 5, 2);
+    ttgo->tft->drawNumber(int(ptmm / 10), 65 , 5, 2);
     if (digit == 4)   ttgo->tft->setTextColor(TFT_YELLOW);
     else   ttgo->tft->setTextColor(TFT_WHITE);
-    ttgo->tft->drawNumber(mm % 10, 85, 5, 2);
+    ttgo->tft->drawNumber(ptmm % 10, 85, 5, 2);
 }
 
 // getTnum takes care of translating where we pressed into
@@ -339,8 +344,8 @@ int getTnum() {
 void setMenuDisplay(int mSel) {
     int curSel = 0;
     // Display mode header
-    ttgo->tft->fillScreen(TFT_BLUE);
-    ttgo->tft->fillRect(0, 80, 239, 80, TFT_BLACK);
+    ttgo->tft->fillScreen(TFT_MAGENTA);
+    ttgo->tft->fillRect(0, 80, 239, 80, TFT_PURPLE);
 
     // Display apps
     if (mSel == 0) curSel = maxApp - 1;
@@ -407,12 +412,12 @@ void displayTime(boolean fullUpdate) {
     // Get the current data
     RTC_Date tnow = ttgo->rtc->getDateTime();
 
-    hh = tnow.hour;
-    mm = tnow.minute;
-    ss = tnow.second;
-    dday = tnow.day;
-    mmonth = tnow.month;
-    yyear = tnow.year;
+    uint8_t dthh = tnow.hour;
+    uint8_t  dtmm = tnow.minute;
+    uint8_t  dtss = tnow.second;
+    uint8_t dtdday = tnow.day;
+    uint8_t dtmmonth = tnow.month;
+    uint16_t dtyyear = tnow.year;
 
     ttgo->tft->setTextSize(1);
 
@@ -420,40 +425,41 @@ void displayTime(boolean fullUpdate) {
         // Font 7 is a 7-seg display but only contains
         // characters [space] 0 1 2 3 4 5 6 7 8 9 0 : .
 
-        ttgo->tft->setTextColor(0x39C4, TFT_BLACK); // Set desired color
+        ttgo->tft->setTextColor(0x39C4); // Set desired color
         ttgo->tft->drawString("88:88", xpos, ypos, 7);
-        ttgo->tft->setTextColor(0xFBE0, TFT_BLACK); // Orange
+        ttgo->tft->setTextColor(0xFBE0); // Orange
 
-        if (hh < 10) xpos += ttgo->tft->drawChar('0', xpos, ypos, 7);
-        xpos += ttgo->tft->drawNumber(hh, xpos, ypos, 7);
+        if (dthh < 10) xpos += ttgo->tft->drawChar('0', xpos, ypos, 7);
+        xpos += ttgo->tft->drawNumber(dthh, xpos, ypos, 7);
         xcolon = xpos + 3;
         xpos += ttgo->tft->drawChar(':', xcolon, ypos, 7);
-        if (mm < 10) xpos += ttgo->tft->drawChar('0', xpos, ypos, 7);
-        ttgo->tft->drawNumber(mm, xpos, ypos, 7);
+        if (dtmm < 10) xpos += ttgo->tft->drawChar('0', xpos, ypos, 7);
+        ttgo->tft->drawNumber(dtmm, xpos, ypos, 7);
     }
 
-    if (ss % 2) { // Toggle the colon every second
-        ttgo->tft->setTextColor(0x39C4, TFT_BLACK);
+    if (dtss % 2) { // Toggle the colon every second
+        ttgo->tft->setTextColor(0x39C4);
         xpos += ttgo->tft->drawChar(':', xcolon, ypos, 7);
-        ttgo->tft->setTextColor(0xFBE0, TFT_BLACK);
+        ttgo->tft->setTextColor(0xFBE0);
     } else {
         ttgo->tft->drawChar(':', xcolon, ypos, 7);
     }
     ttgo->tft->setTextSize(3);
     ttgo->tft->setCursor( 10, 210);
 
-    ttgo->tft->print(mmonth);
+    ttgo->tft->print(dtmmonth);
     ttgo->tft->print("/");
-    ttgo->tft->print(dday);
+    ttgo->tft->print(dtdday);
     ttgo->tft->print("/");
-    ttgo->tft->print(yyear);
+    ttgo->tft->print(dtyyear);
 }
 
 void KT()
 {
-    ttgo->tft->fillScreen(TFT_BLACK);
-    //Lower the brightness
-    watch->bl->adjust(150);
+
+    ktrtc = ttgo->rtc;
+    ktrtc->check();
+
     lv_obj_t *img1 = lv_img_create(lv_scr_act(), NULL);
     lv_img_set_src(img1, &cat_png);
     lv_obj_align(img1, NULL, LV_ALIGN_CENTER, 0, 0);
@@ -481,43 +487,50 @@ void KT()
 
     lv_task_create([](lv_task_t *t) {
 
-        RTC_Date curr_datetime = rtc->getDateTime();
+        RTC_Date curr_datetime = ktrtc->getDateTime();
         lv_label_set_text_fmt(g_data.second, "%02u", curr_datetime.second);
         lv_label_set_text_fmt(g_data.minute, "%02u", curr_datetime.minute);
         lv_label_set_text_fmt(g_data.hour, "%02u", curr_datetime.hour);
 
     }, 1000, LV_TASK_PRIO_MID, nullptr);
-
+    int16_t x, y;
+    while (!ttgo->getTouch(x, y)) {} // Wait for touch
+    while (ttgo->getTouch(x, y)) {}  // Wait for release to exit
+    //Clear screen
+    ttgo->tft->fillScreen(TFT_BLACK);
 }
 
 void setup() {
-  //initSetup();
-  ttgo->begin();
-  ttgo->tft->setTextFont(1);
-  ttgo->tft->fillScreen(TFT_BLACK);
-  ttgo->tft->setTextColor(TFT_YELLOW, TFT_BLACK); // Note: the new fonts do not draw the background colour
-  //Initialize lvgl
-  ttgo->lvgl_begin();
+    //initSetup();
+    TTGOClass *ttgo = TTGOClass::getWatch();
+    ttgo->begin();
+    ttgo->tft->setTextFont(1);
+    ttgo->tft->fillScreen(TFT_BLACK);
+    ttgo->tft->setTextColor(TFT_YELLOW, TFT_BLACK); // Note: the new fonts do not draw the background colour
+    //Initialize lvgl
+    ttgo->lvgl_begin();
 
-  //Check if the RTC clock matches, if not, use compile time
-  ttgo->rtc->check();
+    ttgo->rtc->check();
 
-  //Synchronize time to system time
-  ttgo->rtc->syncToSystem();
+    //Synchronize time to system time
+    ttgo->rtc->syncToSystem();
 
-  displayTime(true); // Our GUI to show the time
-  ttgo->openBL(); // Turn on the backlight
+
+    displayTime(true); // Our GUI to show the time
+    ttgo->openBL(); // Turn on the backlight
+    lv_obj_t *img1 = lv_img_create(lv_scr_act(), NULL);
+    lv_img_set_src(img1, &cat_png);
+    lv_obj_align(img1, NULL, LV_ALIGN_CENTER, 0, 0);
     // Set 20MHz operating speed to reduce power consumption
     //setCpuFrequencyMhz(20);
 
 }
 
 void loop() {
-    lv_task_handler();
-
   if (targetTime < millis()) {
     targetTime = millis() + 1000;
     displayTime(ss == 0); // Call every second but only update time every minute
+      lv_task_handler();
   }
 
   int16_t x, y;
@@ -552,7 +565,6 @@ void loop() {
             KT();
             break;
     }
-
     displayTime(true);
   }
 }
