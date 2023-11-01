@@ -44,7 +44,7 @@ void Mario::update()
     // if vertical velocity and position match ground, reset
     if (vel[1] > 0.0 && y >= initialPosition[1])
     {
-        custom_log("Jump is over, reset!\n");
+        //custom_log("Jump is over, reset!\n");
         vel[1] = 0.0;
         acc[1] = 0.0;
         y = initialPosition[1];
@@ -60,7 +60,7 @@ void Mario::update()
 
     if (x >= LV_HOR_RES && (vel[0] > 0.0f))
     {
-        custom_log("We went out of screen!\n");
+        //custom_log("We went out of screen!\n");
         acc[0] = 0.07f;
         x = initialPosition[0] - width;
         frameIndex = 0.0f;
@@ -113,20 +113,18 @@ void Mario::update()
             float futurePos = x + (steps * vel[0]);
             float futurePosNext = x + ((steps + 1) * vel[0]);
 
-            //custom_log("JUMP target: %d, steps %d, f1 %3.0f, f2 %3.0f, vel %.2f;%.2f, acc: %.2f;%.2f\n",
-            //              targetX, steps, futurePos, futurePosNext,
-            //              vel[0], vel[1], acc[0], acc[1]);
+            //custom_log("JUMP target: %d, steps %d, f1 %3.0f, f2 %3.0f, vel %.2f;%.2f, acc: %.2f;%.2f\n", targetX, steps, futurePos, futurePosNext,vel[0], vel[1], acc[0], acc[1]);
 
             if (targetX >= futurePos && targetX <= futurePosNext)
             {
                 if (jumping)
                 {
-                    custom_log("Skipping jump to %d, already jumping\n", targetX);
+                    //custom_log("Skipping jump to %d, already jumping\n", targetX);
                     ++it;
                 }
                 else
                 {
-                    custom_log("Time to jump to hit %d!\n", targetX);
+                    //custom_log("Time to jump to hit %d!\n", targetX);
                     it = jumpTargets.erase(it);
                     vel[1] = jumpVel;
                     acc[1] = jumpAcc;
@@ -141,7 +139,7 @@ void Mario::update()
 
 void Mario::stopJump()
 {
-    custom_log("Mario head hit something, better stop jumping!\n");
+    //custom_log("Mario head hit something, better stop jumping!\n");
     vel[1] = 0.0;
 }
 
@@ -150,11 +148,11 @@ void Mario::jump(int targetX)
     if (std::any_of(jumpTargets.begin(), jumpTargets.end(),
                     [&targetX](const int &p) { return p == targetX; }))
     {
-        custom_log("Jump target %d already in the list!\n", targetX);
+        //custom_log("Jump target %d already in the list!\n", targetX);
     }
     else
     {
-        custom_log("Added jump target %d to list!\n", targetX);
+        //custom_log("Added jump target %d to list!\n", targetX);
         jumpTargets.push_back(targetX);
     }
 }
@@ -178,7 +176,7 @@ void Mario::resetMario(lv_task_t *task)
 
 void Mario::run()
 {
-    custom_log("Running!");
+    //custom_log("Running!");
     enabledFrames = {1, 2, 3};
     running = true;
 }

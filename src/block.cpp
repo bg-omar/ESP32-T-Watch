@@ -74,7 +74,7 @@ void Block::updateTime()
 
   if (currentValue != value)
   {
-    custom_log("Updating block %d, previous %d: %d\n", type, currentValue, value);
+    //custom_log("Updating block %d, previous %d: %d\n", type, currentValue, value);
     currentValue = value;
     updateSubscribe->schedule(getCenter());
   }
@@ -96,7 +96,7 @@ void Block::hit()
     //custom_log("Block hit already animating!\n");
     return;
   }
-  custom_log("Block hit\n");
+  //custom_log("Block hit\n");
   // TODO: Is this the best way to deal with static class methods?
   // set_user_data actually create a copy (perf?)
   animating = true;
@@ -111,5 +111,5 @@ void Block::animation_finished(struct _lv_task_t *task)
 {
   Block *block = (Block *)task->user_data;
   block->animating = false;
-  custom_log("Animation is finished!\n");
+  //custom_log("Animation is finished!\n");
 }

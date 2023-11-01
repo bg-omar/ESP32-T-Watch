@@ -25,7 +25,7 @@ enum Gestures
 
 #ifndef SIMULATOR
 
-#define custom_log Serial.printf
+#define custom_log  Serial.printf
 
 #define LILYGO_WATCH_2020_V3 // To use T-Watch2020 , please uncomment this line
 #define LILYGO_WATCH_HAS_BUTTON

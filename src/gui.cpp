@@ -157,19 +157,19 @@ void Gui::updateFrame()
 {
   if (mario->isCollidingOnce(boxHour))
   {
-    custom_log("**** Mario colliding with hour block *********\n");
+    //custom_log("**** Mario colliding with hour block *********\n");
     boxHour->hit();
     mario->stopJump();
   }
   if (mario->isCollidingOnce(boxMinutes))
   {
-    custom_log("**** Mario colliding with minutes block *********\n");
+    //custom_log("**** Mario colliding with minutes block *********\n");
     boxMinutes->hit();
     mario->stopJump();
   }
   if (mario->isCollidingOnce(boxSeconds))
   {
-    custom_log("**** Mario colliding with seconds block *********\n");
+    //custom_log("**** Mario colliding with seconds block *********\n");
     boxSeconds->hit();
     mario->stopJump();
   }

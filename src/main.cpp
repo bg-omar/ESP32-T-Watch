@@ -26,8 +26,9 @@ enum
     Q_EVENT_BMA_INT,
     Q_EVENT_AXP_INT,
 };
-TTGOClass *watch = nullptr;
+TTGOClass *watch = TTGOClass::getWatch();
 PCF8563_Class *rtc;
+AXP20X_Class *power = watch->power;
 LV_IMG_DECLARE(kt_png);
 LV_FONT_DECLARE(kt_font);
 
@@ -36,7 +37,7 @@ EventGroupHandle_t g_event_group = NULL;
 EventGroupHandle_t isr_group = NULL;
 bool lenergy = false;
 
-bool marioloper = false;
+bool marioloper, ktloper;
 bool tryNTPtime = true;
 
 // Wifi variables
@@ -76,7 +77,7 @@ void prtTime(byte) ;
 int getTnum() ;
 
 //TTGOClass *ttgo = TTGOClass::getWatch();
-#define APP_TIME_ZONE   2 // I am East Coast in Daylight Savings
+#define APP_TIME_ZONE   1 // I am East Coast in Daylight Savings
 
 const int maxApp = 7; // number of apps
 String appName[maxApp] = {"Clock", "Battery", "Jupiter", "Accel", "Touch", "Mario", "KT"}; // app names
@@ -343,6 +344,9 @@ uint8_t modeMenu() {
 }
 
 void displayTime(boolean fullUpdate) {
+    //    watch->begin();
+    watch->tft->setTextFont(1);
+    watch->tft->setTextColor(TFT_YELLOW, TFT_BLACK); // Note: the new fonts do not draw the background colour
     byte xpos = 40; // Stating position for the display
     byte ypos = 90;
 
@@ -393,7 +397,6 @@ void displayTime(boolean fullUpdate) {
 
 void initWakeupTriggers()
 {
-    AXP20X_Class *power = watch->power;
     BMA *sensor = watch->bma;
     Acfg cfg;
     cfg.odr = BMA4_OUTPUT_DATA_RATE_100HZ;
@@ -456,54 +459,6 @@ void low_energy()
         watch->openBL();
         watch->bma->enableStepCountInterrupt();
     }
-}
-
-bool syncRtc2Ntp()
-{
-    //connect to WiFi
-    custom_log("Connecting to %s\n", ssid);
-    WiFi.begin(ssid, ssid_passphrase);
-    // after 6 sec if WiFi is not found abort and avoid locking the setup
-    int timeoutMs = 6000;
-    while (WiFi.status() != WL_CONNECTED)
-    {
-        delay(500);
-        timeoutMs -= 500;
-        Serial.print(".");
-        if (timeoutMs <= 0)
-        {
-            custom_log("\nWifi connection timed-out!\n");
-            WiFi.mode(WIFI_OFF);
-            return false;
-        }
-    }
-    custom_log("\nConnected to %s \n", ssid);
-
-    //init and get the time from NTP server
-    configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
-    struct tm timeinfo;
-    if (!getLocalTime(&timeinfo))
-    {
-        Serial.println("Failed to obtain time");
-        return false;
-    }
-    Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
-    // RTC_Date updateRTC =(timeinfo.tm_year,timeinfo.tm_mon,timeinfo.tm_mday,timeinfo.tm_hour,timeinfo.tm_min,timeinfo.tm_sec);
-    // watch->rtc->setDateTime(updateRTC);
-    RTC_Date updateRTC;
-    updateRTC.year = timeinfo.tm_year;
-    updateRTC.month = timeinfo.tm_mon;
-    updateRTC.day = timeinfo.tm_mday;
-    updateRTC.hour = timeinfo.tm_hour;
-    updateRTC.minute = timeinfo.tm_min;
-    updateRTC.second = timeinfo.tm_sec;
-    watch->rtc->setDateTime(updateRTC);
-    custom_log("RTC time synched with NTP %2d.%2d.%4d\n", updateRTC.day, updateRTC.month, updateRTC.year);
-
-    //disconnect WiFi as it's no longer needed
-    WiFi.disconnect(true);
-    WiFi.mode(WIFI_OFF);
-    return true;
 }
 
 void appSetTime() {
@@ -580,7 +535,6 @@ void appSetTime() {
 
 void KT()
 {
-
     lv_obj_t *img1 = lv_img_create(lv_scr_act(), NULL);
     lv_img_set_src(img1, &kt_png);
     lv_obj_align(img1, NULL, LV_ALIGN_CENTER, 0, 0);
@@ -614,22 +568,13 @@ void KT()
         lv_label_set_text_fmt(g_data.hour, "%02u", curr_datetime.hour);
 
     }, 1000, LV_TASK_PRIO_MID, nullptr);
-
-    int16_t x, y;
-    while (!watch->getTouch(x, y)) {} // Wait for touch
-    while (watch->getTouch(x, y)) {}  // Wait for release to exit
-    //Clear screen
-    watch->tft->fillScreen(TFT_BLACK);
 }
 
-void mario(){
-
-}
 
 void marioLoop(){
+
         bool rlst;
         uint8_t data;
-        watch->tft->fillScreen(TFT_BLACK);
         //! Fast response wake-up interrupt
         EventBits_t bits = xEventGroupGetBits(isr_group);
         if (bits & WATCH_FLAG_SLEEP_EXIT) {
@@ -706,9 +651,57 @@ void marioLoop(){
         } else {
             low_energy();
         }
-    int16_t x, y;
-    while (!watch->getTouch(x, y)) { }// Wait for touch}
-    while (watch->getTouch(x, y)) {}  // Wait for release to exit
+}
+
+bool syncRtc2Ntp()
+{
+    //connect to WiFi
+    custom_log("Connecting to %s\n", ssid);
+    WiFi.begin(ssid, ssid_passphrase);
+    // after 6 sec if WiFi is not found abort and avoid locking the setup
+    int timeoutMs = 6000;
+    while (WiFi.status() != WL_CONNECTED)
+    {
+        delay(500);
+        timeoutMs -= 500;
+        Serial.print(".");
+        if (timeoutMs <= 0)
+        {
+            custom_log("\nWifi connection timed-out!\n");
+            WiFi.mode(WIFI_OFF);
+            return false;
+        }
+    }
+    custom_log("\nConnected to %s \n", ssid);
+
+    //init and get the time from NTP server
+    configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+    struct tm timeinfo;
+    if (!getLocalTime(&timeinfo))
+    {
+        Serial.println("Failed to obtain time");
+        return false;
+    }
+    Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
+
+
+    RTC_Date updateRTC;
+    watch->rtc->setDateTime(updateRTC);
+    updateRTC.year = timeinfo.tm_year;
+    updateRTC.month = timeinfo.tm_mon;
+    updateRTC.day = timeinfo.tm_mday;
+    updateRTC.hour = timeinfo.tm_hour-1;
+    updateRTC.minute = timeinfo.tm_min;
+    updateRTC.second = timeinfo.tm_sec;
+    watch->rtc->setDateTime(updateRTC);
+
+    custom_log("RTC time synched with NTP %2d.%2d.%4d\n", updateRTC.day, updateRTC.month, updateRTC.year);
+    custom_log("Time now:  %2d.%2d.%4d\n", updateRTC.hour, updateRTC.minute, updateRTC.second);
+
+    //disconnect WiFi as it's no longer needed
+    WiFi.disconnect(true);
+    WiFi.mode(WIFI_OFF);
+    return true;
 }
 
 void setup()
@@ -719,6 +712,7 @@ void setup()
 
     initWakeupTriggers();
 
+    Serial.println("Done Init!");
     //Create a program that allows the required message objects and group flags
     g_event_queue_handle = xQueueCreate(20, sizeof(uint8_t));
     g_event_group = xEventGroupCreate();
@@ -806,95 +800,67 @@ void setup()
 
     watch->rtc->syncToSystem();
     custom_log("RTC time: %s\n", watch->rtc->formatDateTime());
-    lv_obj_t *img1 = lv_img_create(lv_scr_act(), NULL);
-    lv_img_set_src(img1, &kt_png);
-    lv_obj_align(img1, NULL, LV_ALIGN_CENTER, 0, 0);
 
-    static lv_style_t style;
-    lv_style_init(&style);
-    lv_style_set_text_color(&style, LV_STATE_DEFAULT, LV_COLOR_WHITE);
-    lv_style_set_text_font(&style, LV_STATE_DEFAULT, &kt_font);
-
-    g_data.hour = lv_label_create(img1, nullptr);
-    lv_obj_add_style(g_data.hour, LV_OBJ_PART_MAIN, &style);
-    lv_label_set_text(g_data.hour, "00");
-    lv_obj_align(g_data.hour, img1, LV_ALIGN_IN_TOP_MID, 10, 30);
-
-    g_data.minute = lv_label_create(img1, nullptr);
-    lv_obj_add_style(g_data.minute, LV_OBJ_PART_MAIN, &style);
-    lv_label_set_text(g_data.minute, "00");
-    lv_obj_align(g_data.minute, g_data.hour, LV_ALIGN_OUT_RIGHT_MID, 5, 0);
-
-    g_data.second = lv_label_create(img1, nullptr);
-    lv_obj_add_style(g_data.second, LV_OBJ_PART_MAIN, &style);
-    lv_label_set_text(g_data.second, "00");
-    lv_obj_align(g_data.second, g_data.minute, LV_ALIGN_OUT_RIGHT_MID, 9, 0);
-
-    lv_task_create([](lv_task_t *t) {
-        RTC_Date curr_datetime = rtc->getDateTime();
-        lv_label_set_text_fmt(g_data.second, "%02u", curr_datetime.second);
-        lv_label_set_text_fmt(g_data.minute, "%02u", curr_datetime.minute);
-        lv_label_set_text_fmt(g_data.hour, "%02u", curr_datetime.hour);
-
-    }, 1000, LV_TASK_PRIO_MID, nullptr);
-    // Set 20MHz operating speed to reduce power consumption
-    //setCpuFrequencyMhz(20);
     gui = new Gui(new AbstractDevice());
-    gui->setupGui();
+    //gui->setupGui();
 
-
-    watch = TTGOClass::getWatch();
-    watch->begin();
+    //watch = TTGOClass::getWatch();
+    //watch->begin();
     //watch->lvgl_begin();
-
-    rtc->syncToSystem();
+    //rtc->syncToSystem();
     // Use compile time
-    rtc->check();
-
-    watch->openBL();
-
+    //rtc->check();
+    //watch->openBL();
     //Lower the brightness
-    watch->bl->adjust(200);
-
+    //watch->bl->adjust(200);
     //initSetup();
-//    watch->begin();
-//    watch->tft->setTextFont(1);
-//    watch->tft->fillScreen(TFT_BLACK);
-//    watch->tft->setTextColor(TFT_YELLOW, TFT_BLACK); // Note: the new fonts do not draw the background colour
     //Initialize lvgl
     //watch->lvgl_begin();
-
     //watch->rtc->check();
-
     //Synchronize time to system time
-
-
-
     //displayTime(true); // Our GUI to show the time
     //watch->openBL(); // Turn on the backlight
 
+    // Set 20MHz operating speed to reduce power consumption
+    //setCpuFrequencyMhz(20);
 
-
+    marioloper = false;
+    ktloper = false;
 }
 
 
 void loop()
 {
+    if (marioloper) {
+        int16_t x, y;
+        while (!watch->getTouch(x, y)) { marioLoop(); }// Wait for touch}
+        while (watch->getTouch(x, y)) {}
+        marioloper = false;
+        custom_log(" ---> marioloper: %4d \n", marioloper); // Wait for release to exit
+    }
+
+    if (ktloper) {
+        int16_t x, y;
+        while (!watch->getTouch(x, y)) { lv_task_handler(); }// Wait for touch}
+        while (watch->getTouch(x, y)) {}
+        ktloper = false;
+        custom_log(" ---> ktloper: %4d \n", ktloper); // Wait for release to exit
+    }
+
     if (targetTime < millis()) {
         targetTime = millis() + 1000;
         displayTime(ss == 0); // Call every second but only update time every minute
-        lv_task_handler();
-        if (marioloper) marioLoop() ;
     }
 
     int16_t x, y;
     if (watch->getTouch(x, y)) {
         while (watch->getTouch(x, y)) {} // wait for user to release
-
         marioloper = false;
+        ktloper = false;
 
         switch (modeMenu()) { // Call modeMenu. The return is the desired app number
             case 0: // Zero is the clock, just exit the switch
+                displayTime(true);
                 break;
             case 1:
                 appBattery();
@@ -910,13 +876,18 @@ void loop()
                 break;
             case 5:
                 marioloper = true;
+                custom_log(" ---> marioloper: %4d\n", marioloper);
+                gui->setupGui();
                 marioLoop();
                 break;
             case 6:
+                ktloper = true;
+                custom_log(" ---> ktloper: %4d\n", ktloper);
+                watch->tft->fillScreen(TFT_BLACK);
                 KT();
                 break;
         }
-        displayTime(true);
+
     }
 }
 
