@@ -26,14 +26,17 @@ enum
     Q_EVENT_BMA_INT,
     Q_EVENT_AXP_INT,
 };
+TTGOClass *watch = nullptr;
+PCF8563_Class *rtc;
+LV_IMG_DECLARE(kt_png);
+LV_FONT_DECLARE(kt_font);
 
-TTGOClass *ttgo = TTGOClass::getWatch();
 QueueHandle_t g_event_queue_handle = NULL;
 EventGroupHandle_t g_event_group = NULL;
 EventGroupHandle_t isr_group = NULL;
 bool lenergy = false;
 
-
+bool marioloper = false;
 bool tryNTPtime = true;
 
 // Wifi variables
@@ -59,10 +62,7 @@ typedef struct {
 
 
 static str_datetime_t g_data;
-TTGOClass *watch = nullptr;
-PCF8563_Class *rtc;
-LV_IMG_DECLARE(cat_png);
-LV_FONT_DECLARE(cat_font);
+
 
 
 byte xcolon = 0; // location of the colon
@@ -393,8 +393,8 @@ void displayTime(boolean fullUpdate) {
 
 void initWakeupTriggers()
 {
-    AXP20X_Class *power = ttgo->power;
-    BMA *sensor = ttgo->bma;
+    AXP20X_Class *power = watch->power;
+    BMA *sensor = watch->bma;
     Acfg cfg;
     cfg.odr = BMA4_OUTPUT_DATA_RATE_100HZ;
     cfg.range = BMA4_ACCEL_RANGE_2G;
@@ -426,13 +426,13 @@ void initWakeupTriggers()
 
 void low_energy()
 {
-    if (ttgo->bl->isOn())
+    if (watch->bl->isOn())
     {
         xEventGroupSetBits(isr_group, WATCH_FLAG_SLEEP_MODE);
-        ttgo->closeBL();
-        //ttgo->stopLvglTick();
-        ttgo->bma->enableStepCountInterrupt(false);
-        ttgo->displaySleep();
+        watch->closeBL();
+        //watch->stopLvglTick();
+        watch->bma->enableStepCountInterrupt(false);
+        watch->displaySleep();
         lenergy = true;
         // rtc_clk_cpu_freq_set(RTC_CPU_FREQ_2M);
         setCpuFrequencyMhz(20);
@@ -444,17 +444,17 @@ void low_energy()
     }
     else
     {
-        //ttgo->startLvglTick();
-        ttgo->displayWakeup();
-        ttgo->rtc->syncToSystem();
+        //watch->startLvglTick();
+        watch->displayWakeup();
+        watch->rtc->syncToSystem();
         lv_disp_trig_activity(NULL);
         gui->updateTime();
         gui->updateBatteryLevel();
-        gui->updateStepCounter(ttgo->bma->getCounter());
+        gui->updateStepCounter(watch->bma->getCounter());
         gui->updateWakeupCount();
         gui->updateDate();
-        ttgo->openBL();
-        ttgo->bma->enableStepCountInterrupt();
+        watch->openBL();
+        watch->bma->enableStepCountInterrupt();
     }
 }
 
@@ -489,7 +489,7 @@ bool syncRtc2Ntp()
     }
     Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
     // RTC_Date updateRTC =(timeinfo.tm_year,timeinfo.tm_mon,timeinfo.tm_mday,timeinfo.tm_hour,timeinfo.tm_min,timeinfo.tm_sec);
-    // ttgo->rtc->setDateTime(updateRTC);
+    // watch->rtc->setDateTime(updateRTC);
     RTC_Date updateRTC;
     updateRTC.year = timeinfo.tm_year;
     updateRTC.month = timeinfo.tm_mon;
@@ -497,7 +497,7 @@ bool syncRtc2Ntp()
     updateRTC.hour = timeinfo.tm_hour;
     updateRTC.minute = timeinfo.tm_min;
     updateRTC.second = timeinfo.tm_sec;
-    ttgo->rtc->setDateTime(updateRTC);
+    watch->rtc->setDateTime(updateRTC);
     custom_log("RTC time synched with NTP %2d.%2d.%4d\n", updateRTC.day, updateRTC.month, updateRTC.year);
 
     //disconnect WiFi as it's no longer needed
@@ -582,13 +582,13 @@ void KT()
 {
 
     lv_obj_t *img1 = lv_img_create(lv_scr_act(), NULL);
-    lv_img_set_src(img1, &cat_png);
+    lv_img_set_src(img1, &kt_png);
     lv_obj_align(img1, NULL, LV_ALIGN_CENTER, 0, 0);
 
     static lv_style_t style;
     lv_style_init(&style);
     lv_style_set_text_color(&style, LV_STATE_DEFAULT, LV_COLOR_WHITE);
-    lv_style_set_text_font(&style, LV_STATE_DEFAULT, &cat_font);
+    lv_style_set_text_font(&style, LV_STATE_DEFAULT, &kt_font);
 
     g_data.hour = lv_label_create(img1, nullptr);
     lv_obj_add_style(g_data.hour, LV_OBJ_PART_MAIN, &style);
@@ -624,8 +624,98 @@ void KT()
 
 void mario(){
 
+}
+
+void marioLoop(){
+        bool rlst;
+        uint8_t data;
+        watch->tft->fillScreen(TFT_BLACK);
+        //! Fast response wake-up interrupt
+        EventBits_t bits = xEventGroupGetBits(isr_group);
+        if (bits & WATCH_FLAG_SLEEP_EXIT) {
+            if (lenergy) {
+                lenergy = false;
+                // rtc_clk_cpu_freq_set(RTC_CPU_FREQ_160M);
+                setCpuFrequencyMhz(160);
+            }
+
+            low_energy();
+
+            if (bits & WATCH_FLAG_BMA_IRQ) {
+                do {
+                    rlst = watch->bma->readInterrupt();
+                } while (!rlst);
+                xEventGroupClearBits(isr_group, WATCH_FLAG_BMA_IRQ);
+            }
+            if (bits & WATCH_FLAG_AXP_IRQ) {
+                watch->power->readIRQ();
+                watch->power->clearIRQ();
+                //TODO: Only accept axp power pek key short press
+                xEventGroupClearBits(isr_group, WATCH_FLAG_AXP_IRQ);
+            }
+            xEventGroupClearBits(isr_group, WATCH_FLAG_SLEEP_EXIT);
+            xEventGroupClearBits(isr_group, WATCH_FLAG_SLEEP_MODE);
+        }
+        if ((bits & WATCH_FLAG_SLEEP_MODE)) {
+            //! No event processing after entering the information screen
+            return;
+        }
+
+        //! Normal polling
+        if (xQueueReceive(g_event_queue_handle, &data, 5 / portTICK_RATE_MS) == pdPASS) {
+            switch (data) {
+                case Q_EVENT_BMA_INT:
+                    do {
+                        rlst = watch->bma->readInterrupt();
+                    } while (!rlst);
+
+                    //! setp counter
+                    if (watch->bma->isStepCounter()) {
+                        custom_log("Stepcounter: %d\n", watch->bma->getCounter());
+                        gui->updateStepCounter(watch->bma->getCounter());
+                    }
+                    break;
+                case Q_EVENT_AXP_INT:
+                    watch->power->readIRQ();
+                    if (watch->power->isVbusPlugInIRQ()) {
+                        Serial.println("Charging");
+                    }
+                    if (watch->power->isVbusRemoveIRQ()) {
+                        //updateBatteryIcon(LV_ICON_CALCULATION);
+                        Serial.println("Finished charging");
+                    }
+                    if (watch->power->isChargingDoneIRQ()) {
+                        Serial.println("Full charged");
+                    }
+                    if (watch->power->isPEKShortPressIRQ()) {
+                        Serial.println("PEK Short press");
+                        custom_log("Current time: %s\n", watch->rtc->formatDateTime());
+                        watch->power->clearIRQ();
+                        low_energy();
+                        return;
+                    }
+                    watch->power->clearIRQ();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        if (watch->power->isVBUSPlug() || lv_disp_get_inactive_time(NULL) < DEFAULT_SCREEN_TIMEOUT) {
+            lv_task_handler();
+        } else {
+            low_energy();
+        }
+    int16_t x, y;
+    while (!watch->getTouch(x, y)) { }// Wait for touch}
+    while (watch->getTouch(x, y)) {}  // Wait for release to exit
+}
+
+void setup()
+{
+    Serial.begin(115200);
     Serial.println("Woked-up!");
-    ttgo = TTGOClass::getWatch();
+    watch = TTGOClass::getWatch();
 
     initWakeupTriggers();
 
@@ -635,28 +725,27 @@ void mario(){
     isr_group = xEventGroupCreate();
 
     //Initialize TWatch
-    ttgo->begin();
-    ttgo->openBL();
+    watch->begin();
+    watch->openBL();
 
     // Turn on the IRQ used
-    ttgo->power->adc1Enable(AXP202_BATT_VOL_ADC1 | AXP202_BATT_CUR_ADC1 | AXP202_VBUS_VOL_ADC1 | AXP202_VBUS_CUR_ADC1, AXP202_ON);
-    ttgo->power->enableIRQ(AXP202_VBUS_REMOVED_IRQ | AXP202_VBUS_CONNECT_IRQ | AXP202_CHARGING_FINISHED_IRQ, AXP202_ON);
-    ttgo->power->clearIRQ();
+    watch->power->adc1Enable(AXP202_BATT_VOL_ADC1 | AXP202_BATT_CUR_ADC1 | AXP202_VBUS_VOL_ADC1 | AXP202_VBUS_CUR_ADC1, AXP202_ON);
+    watch->power->enableIRQ(AXP202_VBUS_REMOVED_IRQ | AXP202_VBUS_CONNECT_IRQ | AXP202_CHARGING_FINISHED_IRQ, AXP202_ON);
+    watch->power->clearIRQ();
 
 
     // Turn off unused power
     // according to https://github.com/Xinyuan-LilyGO/TTGO_TWatch_Library/blob/master/docs/watch_2020_v2.md
     // TFT/TOUCHT
-    ttgo->power->setPowerOutPut(AXP202_LDO3, AXP202_OFF);
+    watch->power->setPowerOutPut(AXP202_LDO3, AXP202_OFF);
     // GPS Module
-    ttgo->power->setPowerOutPut(AXP202_LDO4, AXP202_OFF);
+    watch->power->setPowerOutPut(AXP202_LDO4, AXP202_OFF);
 
 
     // Enable BMA423 interrupt ，
     // The default interrupt configuration,
     // you need to set the acceleration parameters, please refer to the BMA423_Accel example
-    ttgo->bma->attachInterrupt();
-
+    watch->bma->attachInterrupt();
     //Connection interrupted to the specified pin
     pinMode(BMA423_INT1, INPUT);
     attachInterrupt(
@@ -703,12 +792,11 @@ void mario(){
                 }
             },
             FALLING);
-    //ttgo->lvgl_begin();
-    ttgo->begin();
-
+    watch->lvgl_begin();
+    rtc = watch->rtc;
     //Check if the RTC clock matches, if not, use compile time
-    ttgo->rtc->check();
-    custom_log("RTC time: %s\n", ttgo->rtc->formatDateTime());
+    watch->rtc->check();
+    custom_log("RTC time: %s\n", watch->rtc->formatDateTime());
 
     if (tryNTPtime)
     {
@@ -716,160 +804,16 @@ void mario(){
         syncRtc2Ntp();
     }
 
-    ttgo->rtc->syncToSystem();
-    custom_log("RTC time: %s\n", ttgo->rtc->formatDateTime());
-
-    gui = new Gui(new AbstractDevice());
-    gui->setupGui();
-}
-
-void marioLoop(){
-    bool rlst;
-    uint8_t data;
-
-    //! Fast response wake-up interrupt
-    EventBits_t bits = xEventGroupGetBits(isr_group);
-    if (bits & WATCH_FLAG_SLEEP_EXIT)
-    {
-        if (lenergy)
-        {
-            lenergy = false;
-            // rtc_clk_cpu_freq_set(RTC_CPU_FREQ_160M);
-            setCpuFrequencyMhz(160);
-        }
-
-        low_energy();
-
-        if (bits & WATCH_FLAG_BMA_IRQ)
-        {
-            do
-            {
-                rlst = ttgo->bma->readInterrupt();
-            } while (!rlst);
-            xEventGroupClearBits(isr_group, WATCH_FLAG_BMA_IRQ);
-        }
-        if (bits & WATCH_FLAG_AXP_IRQ)
-        {
-            ttgo->power->readIRQ();
-            ttgo->power->clearIRQ();
-            //TODO: Only accept axp power pek key short press
-            xEventGroupClearBits(isr_group, WATCH_FLAG_AXP_IRQ);
-        }
-        xEventGroupClearBits(isr_group, WATCH_FLAG_SLEEP_EXIT);
-        xEventGroupClearBits(isr_group, WATCH_FLAG_SLEEP_MODE);
-    }
-    if ((bits & WATCH_FLAG_SLEEP_MODE))
-    {
-        //! No event processing after entering the information screen
-        return;
-    }
-
-    //! Normal polling
-    if (xQueueReceive(g_event_queue_handle, &data, 5 / portTICK_RATE_MS) == pdPASS)
-    {
-        switch (data)
-        {
-            case Q_EVENT_BMA_INT:
-                do
-                {
-                    rlst = ttgo->bma->readInterrupt();
-                } while (!rlst);
-
-                //! setp counter
-                if (ttgo->bma->isStepCounter())
-                {
-                    custom_log("Stepcounter: %d\n", ttgo->bma->getCounter());
-                    gui->updateStepCounter(ttgo->bma->getCounter());
-                }
-                break;
-            case Q_EVENT_AXP_INT:
-                ttgo->power->readIRQ();
-                if (ttgo->power->isVbusPlugInIRQ())
-                {
-                    Serial.println("Charging");
-                }
-                if (ttgo->power->isVbusRemoveIRQ())
-                {
-                    //updateBatteryIcon(LV_ICON_CALCULATION);
-                    Serial.println("Finished charging");
-                }
-                if (ttgo->power->isChargingDoneIRQ())
-                {
-                    Serial.println("Full charged");
-                }
-                if (ttgo->power->isPEKShortPressIRQ())
-                {
-                    Serial.println("PEK Short press");
-                    custom_log("Current time: %s\n", ttgo->rtc->formatDateTime());
-                    ttgo->power->clearIRQ();
-                    low_energy();
-                    return;
-                }
-                ttgo->power->clearIRQ();
-                break;
-            default:
-                break;
-        }
-    }
-
-    if (ttgo->power->isVBUSPlug() || lv_disp_get_inactive_time(NULL) < DEFAULT_SCREEN_TIMEOUT)
-    {
-        lv_task_handler();
-    }
-    else
-    {
-        low_energy();
-    }
-    int16_t x, y;
-    while (!watch->getTouch(x, y)) {} // Wait for touch
-    while (watch->getTouch(x, y)) {}  // Wait for release to exit
-}
-
-void setup()
-{
-    Serial.begin(115200);
-    mario();
-
-
-    watch = TTGOClass::getWatch();
-    watch->begin();
-    //watch->lvgl_begin();
-    rtc = watch->rtc;
-    rtc->syncToSystem();
-    // Use compile time
-    rtc->check();
-
-    watch->openBL();
-
-    //Lower the brightness
-    watch->bl->adjust(200);
-
-    //initSetup();
-//    watch->begin();
-//    watch->tft->setTextFont(1);
-//    watch->tft->fillScreen(TFT_BLACK);
-//    watch->tft->setTextColor(TFT_YELLOW, TFT_BLACK); // Note: the new fonts do not draw the background colour
-    //Initialize lvgl
-    //watch->lvgl_begin();
-
-    //watch->rtc->check();
-
-    //Synchronize time to system time
-
-
-
-    displayTime(true); // Our GUI to show the time
-    //watch->openBL(); // Turn on the backlight
-
-
+    watch->rtc->syncToSystem();
+    custom_log("RTC time: %s\n", watch->rtc->formatDateTime());
     lv_obj_t *img1 = lv_img_create(lv_scr_act(), NULL);
-    lv_img_set_src(img1, &cat_png);
+    lv_img_set_src(img1, &kt_png);
     lv_obj_align(img1, NULL, LV_ALIGN_CENTER, 0, 0);
 
     static lv_style_t style;
     lv_style_init(&style);
     lv_style_set_text_color(&style, LV_STATE_DEFAULT, LV_COLOR_WHITE);
-    lv_style_set_text_font(&style, LV_STATE_DEFAULT, &cat_font);
+    lv_style_set_text_font(&style, LV_STATE_DEFAULT, &kt_font);
 
     g_data.hour = lv_label_create(img1, nullptr);
     lv_obj_add_style(g_data.hour, LV_OBJ_PART_MAIN, &style);
@@ -895,27 +839,59 @@ void setup()
     }, 1000, LV_TASK_PRIO_MID, nullptr);
     // Set 20MHz operating speed to reduce power consumption
     //setCpuFrequencyMhz(20);
+    gui = new Gui(new AbstractDevice());
+    gui->setupGui();
+
+
+    watch = TTGOClass::getWatch();
+    watch->begin();
+    //watch->lvgl_begin();
+
+    rtc->syncToSystem();
+    // Use compile time
+    rtc->check();
+
+    watch->openBL();
+
+    //Lower the brightness
+    watch->bl->adjust(200);
+
+    //initSetup();
+//    watch->begin();
+//    watch->tft->setTextFont(1);
+//    watch->tft->fillScreen(TFT_BLACK);
+//    watch->tft->setTextColor(TFT_YELLOW, TFT_BLACK); // Note: the new fonts do not draw the background colour
+    //Initialize lvgl
+    //watch->lvgl_begin();
+
+    //watch->rtc->check();
+
+    //Synchronize time to system time
+
+
+
+    //displayTime(true); // Our GUI to show the time
+    //watch->openBL(); // Turn on the backlight
+
+
+
 }
 
 
 void loop()
 {
-
     if (targetTime < millis()) {
         targetTime = millis() + 1000;
         displayTime(ss == 0); // Call every second but only update time every minute
         lv_task_handler();
+        if (marioloper) marioLoop() ;
     }
 
     int16_t x, y;
     if (watch->getTouch(x, y)) {
         while (watch->getTouch(x, y)) {} // wait for user to release
 
-        // This is where the app selected from the menu is launched
-        // If you add an app, follow the variable update instructions
-        // at the beginning of the menu code and then add a case
-        // statement on to this switch to call your paticular
-        // app routine.
+        marioloper = false;
 
         switch (modeMenu()) { // Call modeMenu. The return is the desired app number
             case 0: // Zero is the clock, just exit the switch
@@ -933,7 +909,7 @@ void loop()
                 appTouch();
                 break;
             case 5:
-                mario();
+                marioloper = true;
                 marioLoop();
                 break;
             case 6:

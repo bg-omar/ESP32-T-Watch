@@ -2,7 +2,10 @@
  * Simple clock display interface, power consumption is about 20mA
  * Written by lewishe
  * */
-#include "config.h"
+
+#define LILYGO_WATCH_2020_V3                // To use a different watch version, comment this
+#define LILYGO_WATCH_LVGL                   // To use LVGL, you need to enable the macro LVGL
+#include <LilyGoWatch.h>
 
 typedef struct {
     lv_obj_t *hour;
@@ -14,8 +17,8 @@ typedef struct {
 static str_datetime_t g_data;
 TTGOClass *watch = nullptr;
 PCF8563_Class *rtc;
-LV_IMG_DECLARE(cat_png);
-LV_FONT_DECLARE(cat_font);
+LV_IMG_DECLARE(kt_png);
+LV_FONT_DECLARE(kt_font);
 
 void setup()
 {
@@ -34,13 +37,13 @@ void setup()
     watch->bl->adjust(150);
 
     lv_obj_t *img1 = lv_img_create(lv_scr_act(), NULL);
-    lv_img_set_src(img1, &cat_png);
+    lv_img_set_src(img1, &kt_png);
     lv_obj_align(img1, NULL, LV_ALIGN_CENTER, 0, 0);
 
     static lv_style_t style;
     lv_style_init(&style);
     lv_style_set_text_color(&style, LV_STATE_DEFAULT, LV_COLOR_WHITE);
-    lv_style_set_text_font(&style, LV_STATE_DEFAULT, &cat_font);
+    lv_style_set_text_font(&style, LV_STATE_DEFAULT, &kt_font);
 
     g_data.hour = lv_label_create(img1, nullptr);
     lv_obj_add_style(g_data.hour, LV_OBJ_PART_MAIN, &style);
