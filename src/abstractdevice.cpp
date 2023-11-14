@@ -22,7 +22,7 @@ int AbstractDevice::getBatteryLevel()
 DateTime AbstractDevice::getDateTime()
 {
     RTC_Date curr = TTGOClass::getWatch()->rtc->getDateTime();
-    return DateTime(curr.day, curr.month, curr.year, curr.hour, curr.minute, curr.second);
+    return {curr.day, curr.month, curr.year, curr.hour, curr.minute, curr.second};
 }
 
 void AbstractDevice::setDateTime(DateTime newDateTime)

@@ -1,0 +1,197 @@
+#ifndef ___LUNOKIOT__CONFIG__GENERATED__
+#define ___LUNOKIOT__CONFIG__GENERATED__
+//
+//    LunokWatch, a open source smartwatch software
+//    Copyright (C) 2022,2023  Jordi Rubió <jordi@binarycell.org>
+//    This file is part of LunokWatch.
+//
+// LunokWatch is free software: you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software 
+// Foundation, either version 3 of the License, or (at your option) any later 
+// version.
+//
+// LunokWatch is distributed in the hope that it will be useful, but WITHOUT 
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more 
+// details.
+//
+// You should have received a copy of the GNU General Public License along with 
+// LunokWatch. If not, see <https://www.gnu.org/licenses/>. 
+//
+
+/*
+ * DONT EDIT THIS FILE DIRECTLY!!! IS A GENERATED FILE on build time USE .template instead
+ */
+
+
+// force esp-idf debug to appear if flags are enabled
+#ifdef LUNOKIOT_DEBUG
+#include <esp_log.h>
+#ifdef LUNOKIOT_DEBUG_SYSTEM
+#ifdef CORE_DEBUG_LEVEL
+#undef CORE_DEBUG_LEVEL
+#endif
+//#define CORE_DEBUG_LEVEL ESP_LOG_VERBOSE
+//#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
+#endif
+#endif
+
+
+#include <Arduino.h>
+
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <esp_event.h>
+#include <esp_event_base.h>
+
+#include "system/Application.hpp"
+
+#define uS_TO_S_FACTOR 1000000 // micros in a second
+
+const PROGMEM uint16_t LUNOKIOT_WAKE_TIME_S=60*8; // used for wakeup the device every X minutes to get samples
+const PROGMEM uint16_t LUNOKIOT_WAKE_TIME_NOTIFICATIONS_S=70; // used for wakeup the device every X minutes to get notifications
+
+const PROGMEM float LUNOKIOT_SYSTEM_HEARTBEAT_TIME = 1500; // system heartbeat in times per second
+const PROGMEM TickType_t LUNOKIOT_SYSTEM_LOOP_TIME = (150 / portTICK_PERIOD_MS); //  system message loops
+const PROGMEM TickType_t LUNOKIOT_TIMEDTASKS_LOOP_TIME = (1000 / portTICK_PERIOD_MS); //  system message loops
+const PROGMEM TickType_t LUNOKIOT_SYSTEM_INTERRUPTS_TIME = (60 / portTICK_PERIOD_MS); // system AXP interrupt controller in times per second
+
+const PROGMEM uint16_t LUNOKIOT_TOUCH_LONG_MS=1200;
+const PROGMEM size_t LUNOKIOT_MAX_LAST_APPS=9; // 9 max (watchface,mainmenu,taskswitch and others are hidden to taskswitcher, as no considered "applications")
+const PROGMEM unsigned long LUNOKIOT_RECENT_APPS_TIMEOUT_S=60*15; // in 15 minutes the app is considered "timed out" and deleted the taskSwitcher entry, so much memory :(
+
+#define LUNOKIOT_BUILD_NUMBER 26478
+const PROGMEM char LUNOKIOT_BUILD_STRING[] = "26478";
+const PROGMEM char LUNOKIOT_KEY[] = "CjfekV7xSLbyKklsterJCgab6N1sFSxA";
+
+#define LUNOKIOT_UPDATE_TIMEOUT (8*1000)
+const PROGMEM char LUNOKIOT_UPDATE_LOCAL_URL_STRING[] = "https://127.0.0.1:4443"; // ./thttpd -p 8080 -d ../site -D
+const PROGMEM char LUNOKIOT_LOCAL_CLOUD_URL[] = "https://127.0.0.1:6969"; // ./thttpd -p 6969 -d ../site -D
+
+#ifdef LUNOKIOT_UPDATES_LOCAL_URL
+const PROGMEM char LastVersionURL[] = "https://127.0.0.1:4443/ota/.buildCount.txt";
+#else
+const PROGMEM char LastVersionURL[] = "https://raw.githubusercontent.com/lunokjod/watch/devel/tool/.buildCount.txt"; // this number determine if update is available online
+#endif
+
+#define LUNOKIOT_BLE_SCAN_LOCATION_INTERVAL 80000 // time between location services scan
+
+#define LUNOKIOT_LIL_STACK_SIZE     512 // app killer thread
+#define LUNOKIOT_TINY_STACK_SIZE 1024*2 // small task
+#define LUNOKIOT_QUERY_STACK_SIZE 1024*3.5 // size for queries
+#define LUNOKIOT_TASK_STACK_SIZE 1024*4 // usual task
+#define LUNOKIOT_MID_STACK_SIZE 1024*6
+#define LUNOKIOT_APP_STACK_SIZE 1024*8  // UI task
+#define LUNOKIOT_NETWORK_STACK_SIZE 1024*16  // WiFi
+#define LUNOKIOT_UI_STACK 1024*32  // UI Loop
+#define LUNOKIOT_PROVISIONING_STACK_SIZE 1024*16    // BLE/OTA/Provisioning/webserver
+#define LUNOKIOT_NETWORK_TASK_STACK_SIZE 1024*22
+
+extern bool systemSleep; // turns true when system is in "gray state" (just after wakeup/sleep)
+extern unsigned long currentBootTime;
+
+extern esp_event_loop_handle_t systemEventloopHandler; // the "core"
+
+extern LunokIoTApplication *currentApplication; // the foreground application running ptr
+
+// sensors current data
+extern uint8_t bmaRotation;
+extern float axpTemp;
+extern float bmaTemp;
+extern int batteryPercent;
+extern bool vbusPresent;
+//const int batteryCapacitymAh=380.0; // capacity of default battery
+//const int batteryCapacitymAh=500.0; // v3 alternative battery ¿how can detect it?
+const int batteryCapacitymAh=380;
+extern float batteryTotalTimeHours; // calculated time
+extern float batteryRemainingTimeHours; // calculated time
+
+extern unsigned long beginBMAActivity;
+extern unsigned long timeBMAActivityStationary;
+extern unsigned long timeBMAActivityWalking;
+extern unsigned long timeBMAActivityRunning;
+extern unsigned long timeBMAActivityInvalid;
+extern unsigned long timeBMAActivityNone;
+extern uint32_t beginStepsBMAActivity;
+extern uint32_t stepsBMAActivityStationary;
+extern uint32_t stepsBMAActivityWalking;
+extern uint32_t stepsBMAActivityRunning;
+extern uint32_t stepsBMAActivityInvalid;
+extern uint32_t stepsBMAActivityNone;
+
+extern const char * currentActivity;
+extern uint32_t stepCount;
+extern int16_t accXMax;
+extern int16_t accXMin;
+extern int16_t accYMax;
+extern int16_t accYMin;
+extern int16_t accZMax;
+extern int16_t accZMin;
+extern int16_t pcX;
+extern int16_t pcY;
+extern int16_t pcZ;
+extern int16_t lpcX;
+extern int16_t lpcY;
+extern int16_t lpcZ;
+extern float degX;
+extern float degY;
+extern float degZ;
+extern int16_t accX;
+extern int16_t accY;
+extern int16_t accZ;
+
+
+/*
+ * UI shit
+ */
+extern uint32_t FPS;
+const PROGMEM uint32_t MAXFPS = 12;
+
+extern int16_t touchX; // X coordinate from last sample
+extern int16_t touchY; // Y coordinate from last sample
+extern bool touched;   // thumb detected from last sample
+extern double touchDragAngle; // get angle from last drag
+extern double touchDragDistance; // get distance from last drag
+extern int16_t touchDragVectorX; // drag vectorX
+extern int16_t touchDragVectorY; // drag vectorY
+
+// Obtained by generateConfig.py from file: openWeatherKey.txt
+const PROGMEM char openWeatherMapApiKey[] = "";
+const PROGMEM char OMDB_API_KEY[] = "";
+
+const PROGMEM uint8_t BaseBackLightBrightness = 10; // minimal bright
+
+// https://aleph.org.mx/cuanto-mide-la-zancada-de-una-persona
+extern uint8_t userTall; 
+extern bool userMaleFemale;
+extern float stepDistanceCm;
+
+// network flags
+const PROGMEM unsigned long NetworkTimeout = 3*1000; // time until wifi is killed by timeout in milliseconds
+const PROGMEM unsigned long ReconnectPeriodMs = (60*1000)*30; // timed WiFi network connection (fetch data)
+
+
+/* Median step by sex */
+const PROGMEM float MAN_STEP_PROPORTION = 0.415;
+const PROGMEM float WOMAN_STEP_PROPORTION = 0.413;
+
+// event timewait
+#define LUNOKIOT_EVENT_DONTCARE_TIME_TICKS 5
+#define LUNOKIOT_EVENT_FAST_TIME_TICKS 20
+#define LUNOKIOT_EVENT_TIME_TICKS 100
+#define LUNOKIOT_EVENT_IMPORTANT_TIME_TICKS 1000
+#define LUNOKIOT_EVENT_MANDATORY_TIME_TICKS portMAX_DELAY
+
+#define LUNOKIOT_PMU_MONITOR 5
+#define COULOMB_TO_MAH (0.27777777777778)
+// UI LockTimes
+extern SemaphoreHandle_t UISemaphore;
+#define LUNOKIOT_UI_SHORT_WAIT 5
+
+#ifdef LUNOKIOT_SERIAL
+#ifndef LUNOKIOT_SERIAL_SPEED
+#define LUNOKIOT_SERIAL_SPEED 115200
+#endif
+#endif
+
+#endif
