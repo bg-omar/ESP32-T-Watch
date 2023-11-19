@@ -62,7 +62,7 @@ const PROGMEM unsigned long LUNOKIOT_RECENT_APPS_TIMEOUT_S=60*15; // in 15 minut
 
 #define LUNOKIOT_BUILD_NUMBER 26478
 const PROGMEM char LUNOKIOT_BUILD_STRING[] = "26478";
-const PROGMEM char LUNOKIOT_KEY[] = "CjfekV7xSLbyKklsterJCgab6N1sFSxA";
+const PROGMEM char LUNOKIOT_KEY[] = "q2MSlsr5jv7A6xZICcLtQMpxtBhbmpkK";
 
 #define LUNOKIOT_UPDATE_TIMEOUT (8*1000)
 const PROGMEM char LUNOKIOT_UPDATE_LOCAL_URL_STRING[] = "https://127.0.0.1:4443"; // ./thttpd -p 8080 -d ../site -D

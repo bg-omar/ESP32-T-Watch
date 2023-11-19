@@ -496,7 +496,6 @@ void loop() {
     displayTime(true);
   }
 }
-/*
 
 void appSetTime() {
     // Get the current info
@@ -613,4 +612,3 @@ void appSetTime() {
     //Clear screen
     watch->tft->fillScreen(TFT_BLACK);
 }
-*/

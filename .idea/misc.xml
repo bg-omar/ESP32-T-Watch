@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="CidrRootsConfiguration">
+    <sourceRoots>
+      <file path="$PROJECT_DIR$/src_kt_frameworks" />
+    </sourceRoots>
+    <excludeRoots>
+      <file path="$PROJECT_DIR$/src" />
+      <file path="$PROJECT_DIR$/src_KT" />
+      <file path="$PROJECT_DIR$/src_SteamPunk" />
+      <file path="$PROJECT_DIR$/src_framework" />
+      <file path="$PROJECT_DIR$/src_goodwatch" />
+      <file path="$PROJECT_DIR$/src_watch2020" />
+    </excludeRoots>
+  </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />
   <component name="PlatformIOSettings">
     <option name="linkedExternalProjectsSettings">

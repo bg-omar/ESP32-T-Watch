@@ -1,3 +1,4 @@
+#include <sstream>
 #include "gui.h"
 
 Gui::Gui(AbstractDevice *ad) : abstractDevice(ad) {}

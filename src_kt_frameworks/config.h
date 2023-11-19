@@ -1,9 +1,6 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
-#include <cstdio>
-#include <cstdlib>
-#include <sstream>
 
 #define FPS 30
 
@@ -23,7 +20,6 @@ enum Gestures
     down
 };
 
-#ifndef SIMULATOR
 
 #define custom_log  Serial.printf
 
@@ -38,8 +34,11 @@ enum Gestures
 #define WATCH_FLAG_AXP_IRQ _BV(4)
 
 #include <LilyGoWatch.h>
-#else
-#define custom_log printf
 #include <lvgl.h>
-#endif
+
+LV_IMG_DECLARE(kt_png);
+LV_FONT_DECLARE(kt_font);
+
+
+
 #endif //__CONFIG_H
