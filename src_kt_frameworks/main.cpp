@@ -38,7 +38,7 @@ AXP20X_Class *power = watch->power;
 
 
 
-bool marioloper, ktloper;
+bool marioLooper, ktLooper = false;
 
 
 
@@ -121,34 +121,30 @@ void setup()
     Serial.begin(115200);
     Serial.println("Woked-up!");
     watch = TTGOClass::getWatch();
-
     appMario::setupMario();
-
-
     // Set 20MHz operating speed to reduce power consumption
     //setCpuFrequencyMhz(20);
 
-    marioloper = false;
-    ktloper = false;
+
 }
 
 
 void loop()
 {
-    if (marioloper) {
+    if (marioLooper) {
         int16_t x, y;
         while (!watch->getTouch(x, y)) { appMario::marioLoop(); }// Wait for touch
         while (watch->getTouch(x, y)) {}
-        marioloper = false;
-        custom_log(" ---> marioloper: %4d \n", marioloper); // Wait for release to exit
+        marioLooper = false;
+        custom_log(" ---> marioLooper: %4d \n", marioLooper); // Wait for release to exit
     }
 
-    if (ktloper) {
+    if (ktLooper) {
         int16_t x, y;
         while (!watch->getTouch(x, y)) { lv_task_handler(); }// Wait for touch}
         while (watch->getTouch(x, y)) {}
-        ktloper = false;
-        custom_log(" ---> ktloper: %4d \n", ktloper); // Wait for release to exit
+        ktLooper = false;
+        custom_log(" ---> ktLooper: %4d \n", ktLooper); // Wait for release to exit
     }
 
     if (targetTime < millis()) {
@@ -159,15 +155,15 @@ void loop()
     int16_t x, y;
     if (watch->getTouch(x, y)) {
         while (watch->getTouch(x, y)) {} // wait for user to release
-        marioloper = false;
-        ktloper = false;
+        marioLooper = false;
+        ktLooper = false;
 
         switch (modeMenu()) { // Call modeMenu. The return is the desired app number
             case 0: // Zero is the clock, just exit the switch
                 appDisplayTime::displayTime(true);
                 break;
             case 1:
-                appBattery();
+                appBattery::battery();
                 break;
             case 2:
                 appJsat::jSats();
@@ -182,14 +178,14 @@ void loop()
                 appTouch::touch();
                 break;
             case 6:
-                marioloper = true;
+                marioLooper = true;
                 appMario::setupGUI();
-                custom_log(" ---> marioloper: %4d\n", marioloper);
+                custom_log(" ---> marioLooper: %4d\n", marioLooper);
                 appMario::marioLoop();
                 break;
             case 7:
-                ktloper = true;
-                custom_log(" ---> ktloper: %4d\n", ktloper);
+                ktLooper = true;
+                custom_log(" ---> ktLooper: %4d\n", ktLooper);
                 watch->tft->fillScreen(TFT_BLACK);
                 appKT::KT();
                 break;

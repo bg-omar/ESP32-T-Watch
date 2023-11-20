@@ -21,8 +21,6 @@ bool appMario::tryNTPtime = true;
 Gui *appMario::gui = new Gui(new AbstractDevice());
 
 void appMario::setupMario(){
-
-
     g_event_queue_handle = xQueueCreate(20, sizeof(uint8_t));
     g_event_group = xEventGroupCreate();
     isr_group = xEventGroupCreate();

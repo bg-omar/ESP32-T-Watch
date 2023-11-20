@@ -5,6 +5,8 @@
 #ifndef ARDUINO_KT_WATCH_APPBATTERY_H
 #define ARDUINO_KT_WATCH_APPBATTERY_H
 
-void appBattery();
-
+class appBattery {
+public:
+    static void battery();
+};
 #endif //ARDUINO_KT_WATCH_APPBATTERY_H

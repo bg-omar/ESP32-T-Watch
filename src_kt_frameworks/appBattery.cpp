@@ -5,7 +5,7 @@
 #include "appBattery.h"
 
 
-void appBattery() {
+void appBattery::battery() {
     TTGOClass *watch = TTGOClass::getWatch();
     watch->tft->fillScreen(TFT_BLACK);
     watch->tft->setTextColor(TFT_YELLOW, TFT_BLACK);
@@ -36,3 +36,7 @@ void appBattery() {
     //Clear screen
     watch->tft->fillScreen(TFT_BLACK);
 }
+
+
+
+
