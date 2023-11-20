@@ -1,3 +1,3 @@
-# LilyGo Watch - Ultimate Cat Watch
+# LilyGo Watch - my own watch?
 
-Building the Ultimate Cat Watch
+Building the Ultimate KT Watch
