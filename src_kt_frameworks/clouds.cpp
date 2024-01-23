@@ -13,16 +13,16 @@ void Clouds::update(){
     int mi = curr.month;
     int day = curr.day;
     const char *m = months[mi];
-    custom_log("New date %02d.%02d | %s\n", day, mi, m);
+    // custom_log("New date %02d.%02d | %s\n", day, mi, m);
 
     char buff[3];
     sprintf(buff, "%02d", day);
     lv_label_set_text_fmt(dayLabel, buff);
-    lv_obj_align(dayLabel, NULL, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_align(dayLabel,nullptr, LV_ALIGN_CENTER, 0, 0);
     lv_label_set_align(dayLabel, LV_LABEL_ALIGN_CENTER);
 
     lv_label_set_text_fmt(monthLabel, m);
-    lv_obj_align(monthLabel, NULL, LV_ALIGN_CENTER, 3, 0);
+    lv_obj_align(monthLabel,nullptr, LV_ALIGN_CENTER, 3, 0);
     lv_label_set_align(monthLabel, LV_LABEL_ALIGN_RIGHT);
 }
 
@@ -40,27 +40,27 @@ void Clouds::render()
     lv_anim_path_init(&path);
     lv_anim_path_set_cb(&path, lv_anim_path_ease_in_out);
 
-    cloudDayContainer = lv_cont_create(parent, NULL);
+    cloudDayContainer = lv_cont_create(parent, nullptr);
     lv_obj_add_style(cloudDayContainer, LV_OBJ_PART_MAIN, &style);
     lv_obj_set_pos(cloudDayContainer, x-84, y-10);
     lv_obj_set_size(cloudDayContainer, 50, 32);    
 
-    cloudMonthContainer = lv_cont_create(parent, NULL);
+    cloudMonthContainer = lv_cont_create(parent, nullptr);
     lv_obj_add_style(cloudMonthContainer, LV_OBJ_PART_MAIN, &style);
     lv_obj_set_pos(cloudMonthContainer, x, y);
     lv_obj_set_size(cloudMonthContainer, 50, 32);    
 
-    lv_obj_t *cloudDayImg = lv_img_create(cloudDayContainer, NULL);
+    lv_obj_t *cloudDayImg = lv_img_create(cloudDayContainer, nullptr);
     lv_img_set_src(cloudDayImg, &cloud);
-    lv_obj_align(cloudDayImg, NULL, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_align(cloudDayImg,nullptr, LV_ALIGN_CENTER, 0, 0);
 
-    dayLabel = lv_label_create(cloudDayContainer, NULL);
+    dayLabel = lv_label_create(cloudDayContainer, nullptr);
 
-    lv_obj_t *cloudMonthImg = lv_img_create(cloudMonthContainer, NULL);
+    lv_obj_t *cloudMonthImg = lv_img_create(cloudMonthContainer, nullptr);
     lv_img_set_src(cloudMonthImg, &cloud);
-    lv_obj_align(cloudMonthImg, NULL, LV_ALIGN_CENTER, 5, 0);
+    lv_obj_align(cloudMonthImg,nullptr, LV_ALIGN_CENTER, 5, 0);
 
-    monthLabel = lv_label_create(cloudMonthContainer, NULL);
+    monthLabel = lv_label_create(cloudMonthContainer, nullptr);
 
     lv_anim_init(&animDay);
     lv_anim_set_var(&animDay, cloudDayContainer);

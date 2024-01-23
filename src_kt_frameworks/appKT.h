@@ -7,18 +7,13 @@
 
 #include "config.h"
 
-typedef struct {
-    lv_obj_t *hour;
-    lv_obj_t *minute;
-    lv_obj_t *second;
-} str_datetime_t;
-
-static str_datetime_t g_data;
 class appKT {
 private:
     static PCF8563_Class *rtcKT;
 public:
     static void KT();
+
+    static void setupKT();
 };
 
 

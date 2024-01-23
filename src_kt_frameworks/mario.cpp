@@ -17,7 +17,7 @@ void Mario::render()
     lv_style_set_bg_color(&style, LV_STATE_DEFAULT, LV_COLOR_TRANSP);
     lv_style_set_bg_opa(&style, LV_STATE_DEFAULT, LV_OPA_TRANSP);
     lv_style_set_border_width(&style, LV_STATE_DEFAULT, 0);
-    marioContainer = lv_cont_create(parent, NULL);
+    marioContainer = lv_cont_create(parent, nullptr);
     lv_obj_add_style(marioContainer, LV_OBJ_PART_MAIN, &style);
 
     lv_obj_set_pos(marioContainer, x, y);
@@ -25,12 +25,12 @@ void Mario::render()
     lv_obj_set_width(marioContainer, width);
     lv_obj_set_height(marioContainer, height);
 
-    marioImg = lv_img_create(marioContainer, NULL);
+    marioImg = lv_img_create(marioContainer, nullptr);
     lv_img_set_src(marioImg, &mario_player);
     lv_obj_set_pos(marioImg, 0, 0);
     lv_obj_set_width(marioImg, width);
     lv_obj_set_height(marioImg, height);
-    lv_obj_align(marioImg, NULL, LV_ALIGN_IN_TOP_LEFT, 0, 0);
+    lv_obj_align(marioImg,nullptr, LV_ALIGN_IN_TOP_LEFT, 0, 0);
 
     int mx = frames.at(2).first;
     int my = frames.at(2).second;

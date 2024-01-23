@@ -21,7 +21,7 @@ void Block::render()
   lv_style_set_text_font(&style, LV_STATE_DEFAULT, &emulogic_11);
   lv_style_set_border_width(&style, LV_STATE_DEFAULT, 0);
 
-  boxContainer = lv_cont_create(parent, NULL);
+  boxContainer = lv_cont_create(parent, nullptr);
   lv_obj_add_style(boxContainer, LV_OBJ_PART_MAIN, &style);
   lv_obj_set_pos(boxContainer, x, y);
   lv_obj_set_width(boxContainer, width);
@@ -29,18 +29,18 @@ void Block::render()
 
   if (type == BlockType::Empty)
   {
-    lv_obj_t *boxImg = lv_img_create(boxContainer, NULL);
+    lv_obj_t *boxImg = lv_img_create(boxContainer, nullptr);
     lv_img_set_src(boxImg, &emptyblock);
-    lv_obj_align(boxImg, NULL, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_align(boxImg,nullptr, LV_ALIGN_CENTER, 0, 0);
   }
   else
   {
-    lv_obj_t *boxImg = lv_img_create(boxContainer, NULL);
+    lv_obj_t *boxImg = lv_img_create(boxContainer, nullptr);
     lv_img_set_src(boxImg, &block);
-    lv_obj_align(boxImg, NULL, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_align(boxImg,nullptr, LV_ALIGN_CENTER, 0, 0);
 
-    timeLabel = lv_label_create(boxContainer, NULL);
-    lv_obj_align(timeLabel, NULL, LV_ALIGN_CENTER, (int)floor(width / 2.0) - 1, -1);
+    timeLabel = lv_label_create(boxContainer, nullptr);
+    lv_obj_align(timeLabel,nullptr, LV_ALIGN_CENTER, (int)floor(width / 2.0) - 1, -1);
     lv_label_set_text(timeLabel, "00");
 
     lv_anim_init(&boxAnim);

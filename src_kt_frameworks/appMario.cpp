@@ -12,9 +12,9 @@ TTGOClass *watchMario = TTGOClass::getWatch();
 PCF8563_Class *rtcMario = watchMario->rtc;
 const char* appMario::ssid = SSID;
 const char* appMario::ssid_passphrase = PASSWORD;
-QueueHandle_t appMario::g_event_queue_handle = NULL;
-EventGroupHandle_t appMario::g_event_group = NULL;
-EventGroupHandle_t appMario::isr_group = NULL;
+QueueHandle_t appMario::g_event_queue_handle = nullptr;
+EventGroupHandle_t appMario::g_event_group = nullptr;
+EventGroupHandle_t appMario::isr_group = nullptr;
 
 bool appMario::lenergy = false;
 bool appMario::tryNTPtime = true;
@@ -224,7 +224,7 @@ void appMario::low_energy()
         //watchMario->startLvglTick();
         watchMario->displayWakeup();
         watchMario->rtc->syncToSystem();
-        lv_disp_trig_activity(NULL);
+        lv_disp_trig_activity(nullptr);
         gui->updateTime();
         gui->updateBatteryLevel();
         gui->updateStepCounter(watchMario->bma->getCounter());
@@ -310,7 +310,7 @@ void appMario::marioLoop(){
         }
     }
 
-    if (watchMario->power->isVBUSPlug() || lv_disp_get_inactive_time(NULL) < DEFAULT_SCREEN_TIMEOUT) {
+    if (watchMario->power->isVBUSPlug() || lv_disp_get_inactive_time(nullptr) < DEFAULT_SCREEN_TIMEOUT) {
         lv_task_handler();
     } else {
         low_energy();

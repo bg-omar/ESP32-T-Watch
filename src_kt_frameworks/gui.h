@@ -32,7 +32,7 @@ private:
   
   Block *boxHour, *boxMinutes, *boxSeconds = nullptr;
   Clouds *dateCloud = nullptr;
-  Gestures process_gesture(lv_event_t event);
+  static Gestures process_gesture(lv_event_t event);
 
   static void lv_update_task(struct _lv_task_t *);
   static void event_handler(lv_obj_t *obj, lv_event_t event);

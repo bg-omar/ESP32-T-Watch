@@ -17,9 +17,9 @@ void Gui::setupGui()
   lv_style_set_text_font(&style, LV_STATE_DEFAULT, &emulogic_10);
   lv_obj_add_style(scr, LV_OBJ_PART_MAIN, &style);
 
-  lv_obj_t *img_bin = lv_img_create(scr, NULL);
+  lv_obj_t *img_bin = lv_img_create(scr, nullptr);
   lv_img_set_src(img_bin, &world);
-  lv_obj_align(img_bin, NULL, LV_ALIGN_CENTER, 0, 0);
+  lv_obj_align(img_bin,nullptr, LV_ALIGN_CENTER, 0, 0);
 
   // Characters
   mario = new Mario(scr, 0, 170, 23, 46);
@@ -43,34 +43,34 @@ void Gui::setupGui()
   // header
 
   // step counter
-  lv_obj_t *stepLabel = lv_label_create(scr, NULL);
-  lv_obj_align(stepLabel, NULL, LV_ALIGN_IN_TOP_LEFT, 10, 10);
+  lv_obj_t *stepLabel = lv_label_create(scr, nullptr);
+  lv_obj_align(stepLabel,nullptr, LV_ALIGN_IN_TOP_LEFT, 10, 10);
   lv_label_set_align(stepLabel, LV_LABEL_ALIGN_LEFT);
   lv_label_set_text(stepLabel, "MARIO");
 
-  stepLabelValue = lv_label_create(scr, NULL);
-  lv_obj_align(stepLabelValue, NULL, LV_ALIGN_IN_TOP_LEFT, 10, 22);
+  stepLabelValue = lv_label_create(scr, nullptr);
+  lv_obj_align(stepLabelValue, nullptr, LV_ALIGN_IN_TOP_LEFT, 10, 22);
   lv_label_set_align(stepLabelValue, LV_LABEL_ALIGN_LEFT);
   lv_label_set_text(stepLabelValue, "000000");
 
   // wakeup counter (coins)
-  lv_obj_t *coinImg = lv_img_create(scr, NULL);
+  lv_obj_t *coinImg = lv_img_create(scr, nullptr);
   lv_img_set_src(coinImg, &coin);
-  lv_obj_align(coinImg, NULL, LV_ALIGN_IN_TOP_LEFT, 90, 22);
+  lv_obj_align(coinImg,nullptr, LV_ALIGN_IN_TOP_LEFT, 90, 22);
 
-  coinsLabel = lv_label_create(scr, NULL);
-  lv_obj_align(coinsLabel, NULL, LV_ALIGN_IN_TOP_LEFT, 102, 22);
+  coinsLabel = lv_label_create(scr, nullptr);
+  lv_obj_align(coinsLabel,nullptr, LV_ALIGN_IN_TOP_LEFT, 102, 22);
   lv_label_set_align(coinsLabel, LV_LABEL_ALIGN_CENTER);
   lv_label_set_text(coinsLabel, "*00");
 
   // battery
-  lv_obj_t *wtflabel = lv_label_create(scr, NULL);
-  lv_obj_align(wtflabel, NULL, LV_ALIGN_IN_TOP_RIGHT, -10, 10);
+  lv_obj_t *wtflabel = lv_label_create(scr, nullptr);
+  lv_obj_align(wtflabel,nullptr, LV_ALIGN_IN_TOP_RIGHT, -10, 10);
   lv_label_set_align(wtflabel, LV_LABEL_ALIGN_RIGHT);
   lv_label_set_text(wtflabel, "TIME");
 
-  batteryLabelValue = lv_label_create(scr, NULL);
-  lv_obj_align(batteryLabelValue, NULL, LV_ALIGN_IN_TOP_RIGHT, -10, 22);
+  batteryLabelValue = lv_label_create(scr, nullptr);
+  lv_obj_align(batteryLabelValue,nullptr, LV_ALIGN_IN_TOP_RIGHT, -10, 22);
   lv_label_set_align(batteryLabelValue, LV_LABEL_ALIGN_RIGHT);
 
   // date
@@ -104,12 +104,12 @@ void Gui::updateTime()
 
 void Gui::updateBatteryLevel()
 {
-  int p = abstractDevice->getBatteryLevel();
+  int p = AbstractDevice::getBatteryLevel();
   std::stringstream ss;
   ss << p;
   lv_label_set_text(batteryLabelValue, ss.str().c_str());
   lv_label_set_align(batteryLabelValue, LV_LABEL_ALIGN_RIGHT);
-  lv_obj_align(batteryLabelValue, NULL, LV_ALIGN_IN_TOP_RIGHT, -10, 22);
+  lv_obj_align(batteryLabelValue,nullptr, LV_ALIGN_IN_TOP_RIGHT, -10, 22);
   custom_log("Battery is %2d %%\n", p);
 }
 
@@ -118,7 +118,7 @@ void Gui::updateStepCounter(unsigned int steps)
   char buff[7];
   sprintf(buff, "%06u", steps);
   lv_label_set_text(stepLabelValue, buff);
-  lv_obj_align(stepLabelValue, NULL, LV_ALIGN_IN_TOP_LEFT, 10, 22);
+  lv_obj_align(stepLabelValue,nullptr, LV_ALIGN_IN_TOP_LEFT, 10, 22);
   custom_log("Steps %06d\n", steps);
 }
 
@@ -133,7 +133,7 @@ void Gui::updateWakeupCount()
   char buff[4];
   sprintf(buff, "*%02u", wakeUpCounter);
   lv_label_set_text(coinsLabel, buff);
-  lv_obj_align(coinsLabel, NULL, LV_ALIGN_IN_TOP_LEFT, 102, 22);
+  lv_obj_align(coinsLabel,nullptr, LV_ALIGN_IN_TOP_LEFT, 102, 22);
 }
 
 void Gui::event_handler(lv_obj_t *obj, lv_event_t event)

@@ -36,13 +36,7 @@ TTGOClass *watch = TTGOClass::getWatch();
 PCF8563_Class *rtc;
 AXP20X_Class *power = watch->power;
 
-
-
 bool marioLooper, ktLooper = false;
-
-
-
-
 static uint8_t ss ;
 
 
@@ -122,6 +116,7 @@ void setup()
     Serial.println("Woked-up!");
     watch = TTGOClass::getWatch();
     appMario::setupMario();
+    appKT::setupKT();
     // Set 20MHz operating speed to reduce power consumption
     //setCpuFrequencyMhz(20);
 
@@ -137,6 +132,7 @@ void loop()
         while (watch->getTouch(x, y)) {}
         marioLooper = false;
         custom_log(" ---> marioLooper: %4d \n", marioLooper); // Wait for release to exit
+        watch->tft->fillScreen(TFT_BLACK);
     }
 
     if (ktLooper) {
@@ -145,6 +141,7 @@ void loop()
         while (watch->getTouch(x, y)) {}
         ktLooper = false;
         custom_log(" ---> ktLooper: %4d \n", ktLooper); // Wait for release to exit
+        watch->tft->fillScreen(TFT_BLACK);
     }
 
     if (targetTime < millis()) {
