@@ -1,7 +1,7 @@
 /****************************************************************************
- *   June 14 02:01:00 2021
- *   Copyright  2021  Dirk Sarodnick
- *   Email: programmer@dirk-sarodnick.de
+ *   Aug 11 17:13:51 2020
+ *   Copyright  2020  Dirk Brosswick
+ *   Email: dirk.brosswick@googlemail.com
  ****************************************************************************/
  
 /*
@@ -19,9 +19,16 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _KODI_REMOTE_MAIN_H
-    #define _KODI_REMOTE_MAIN_H
+#ifndef _TRACKER_APP_VIEW_H
+    #define _TRACKER_APP_VIEW_H
 
-    void kodi_remote_app_main_setup( uint32_t tile_num );
+    #include "config.h"
+    #include "hardware/gpsctl.h"
+    /**
+     * @brief tracker main setup function
+     */
+    void tracker_app_view_setup( uint32_t tile );
+    void tracker_app_view_add_data( gps_data_t *gps_data );
+    void tracker_app_view_clean_data( void );
 
-#endif // _KODI_REMOTE_MAIN_H
+#endif // _TRACKER_APP_VIEW_H

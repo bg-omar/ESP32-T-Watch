@@ -1,6 +1,6 @@
 /****************************************************************************
- *   Jun 14 17:13:51 2022
- *   Copyright  2022  Dirk Brosswick
+ *   Aug 11 17:13:51 2020
+ *   Copyright  2020  Dirk Brosswick
  *   Email: dirk.brosswick@googlemail.com
  ****************************************************************************/
  
@@ -19,25 +19,25 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _PRESENTER_APP_H
-    #define _PRESENTER_APP_H
+#ifndef _TRACKER_APP_H
+    #define _TRACKER_APP_H
 
     #include "utils/logging.h"
     /**
-     * @brief presenter main setup function
+     * @brief tracker main setup function
      */
-    void presenter_app_setup( void );
+    void tracker_app_setup( void );
     /**
-     * @brief get the presenter app main tile numnber
+     * @brief get the tracker app main tile numnber
      * 
      * @return uint32_t 
      */
-    uint32_t presenter_app_get_app_main_tile_num( void );
+    uint32_t tracker_app_get_app_main_tile_num( void );
     /**
-     * @brief get the presenter app setup tile numnber
+     * @brief get the tracker app setup tile numnber
      * 
      * @return uint32_t 
      */
-    uint32_t presenter_app_get_app_setup_tile_num( void );
+    uint32_t tracker_app_get_app_view_tile_num( void );
 
-#endif // _PRESENTER_APP_H
+#endif // _TRACKER_APP_H
