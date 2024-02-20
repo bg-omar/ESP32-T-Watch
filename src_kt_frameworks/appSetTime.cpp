@@ -74,7 +74,7 @@ void appSetTime::setTime() {
     uint8_t stdday = tnow.day;
     uint8_t stmmonth = tnow.month;
     uint16_t styyear = tnow.year;
-    custom_log(" ---> setTime::appSetTime() tnow: %4d\n", tnow);
+    custom_log(" +++++++++++++++++++++++ setTime::appSetTime() tnow: %d : %d\n", tnow.hour, tnow.minute);
 //Set up the interface buttons
 
     getWatch->tft->fillScreen(TFT_BLACK);
