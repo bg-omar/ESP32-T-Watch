@@ -74,7 +74,7 @@ void appSetTime::setTime() {
     uint8_t stdday = tnow.day;
     uint8_t stmmonth = tnow.month;
     uint16_t styyear = tnow.year;
-    custom_log(" ---> setTime::appSetTime() tnow: %4d\n", tnow);
+    custom_log(" +++++++++++++++++++++++ setTime::appSetTime() tnow: %d : %d\n", tnow.hour, tnow.minute);
 //Set up the interface buttons
 
     getWatch->tft->fillScreen(TFT_BLACK);
@@ -111,19 +111,24 @@ void appSetTime::setTime() {
     while (wl != 13) {
         wl = getTnum();
         if (wl != -1) {
-
+            custom_log(" ---------------> digit location: %d \n", curnum);
+            custom_log(" ---> getTnum(): %d \n", wl);
             switch (curnum) {
                 case 1:
                     appSetTime::hh = wl * 10 + sthh % 10;
+                    custom_log(" ---> hh: %d \n", hh);
                     break;
                 case 2:
-                    appSetTime::hh = int(sthh / 10) * 10 + wl;
+                    appSetTime::hh = int(hh / 10) * 10 + wl;
+                    custom_log(" ---> hh: %d \n", hh);
                     break;
                 case 3:
                     appSetTime::mm = wl * 10 + stmm % 10;
+                    custom_log(" ---> mm: %d \n", mm);
                     break;
                 case 4:
-                    appSetTime::mm = int(stmm / 10) * 10 + wl;
+                    appSetTime::mm = int(mm / 10) * 10 + wl;
+                    custom_log(" ---> mm: %d \n", mm);
                     break;
             }
             while (getTnum() != -1) {}
