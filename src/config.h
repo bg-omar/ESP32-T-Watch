@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #ifndef _CONFIG_H
-
+#define LILYGO_WATCH_2020_V3
     #include "lvgl.h"
 
     #ifdef NATIVE_64BIT

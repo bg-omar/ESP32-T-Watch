@@ -1,0 +1,70 @@
+cyberWatch 1.0
+========================
+- REFACTOR: rewrite UI
+- FEATURE: notification bar in top of the display
+- FEATURE: locked display can be unlocked by "long touch" - (>0.4s)
+- FEATURE: apps can handle long touch - (>0.4s)
+- FEATURE: any app can be "on top", e.g. settings panel which is not incluuded in swiping order
+- FEATURE: display adjust is changeable in settings screen / miniapp
+- FEATURE: using run modes to control flow of current mode (for future pin screen after start, battery charging when connect turned off watches to power supply)
+- FEATURE: charging mode (when connect power to turned off watches, show battery icon + % bar instead of fully start)
+- FEATURE: "Cassete futurism" clock face
+- FEATURE: "Knight Rider speaker" clock face
+- FEATURE: Analog wazchface shows date
+- FEATURE: 3-slot alarm
+- FEATURE: calendar can be reset to the current moon by long touch instead of PEKshort
+- FEATURE: PEKShort si default in every app to get to watch face, if not overloaded
+- REFACTOR: Move apps related function to AppRunner from MainScreen #refactor
+- REFACTOR: display adjust is now set in percentage (1 - 100) (and stored in resgistry after shutdown)
+- REFACTOR: reset display typography method instead of calling all methods to set default color, font & szie
+- BUGFIX: Fix read bma interupt in MoveSensor isTilt func which caused not waked by tilt in some watch faces
+- BUGFIX: analog + planetoid watch faces update every second (check for prev second)
+
+cyberWatch 0.4
+========================
+- FEATURE: set mainscreen to datetime app after power on / wakeup (touch)
+- FEATURE: wakeup to locked screen, unlock by PEKshort
+- FEATURE: system event subsystem
+- FEATURE: when display always on - and inactivity conditions are true, set to default screen and lock ui
+- FEATURE: when display always on - detect if watch are off hand (and no moving e.g. on table) - goes sleep to prevent energy consumption when not on hand
+- FEATURE: "about screen" with version, commit hash and date and time of compilation
+- FEATURE: "about screen" also contains uptime and time unplugged from power
+
+cyberWatch 0.3
+========================
+- FEATURE: system ticker + do some operations only every Xth tick (battery savings)
+- REFACTORING: rename System to Core package and create Hardware subpackage
+- BUGIFX: milliseconds instead of microseconds in sleep method
+
+cyberWatch 0.2
+========================
+ - FEATURE: partially support for TTGO Watch V2 (motor operation only if LILYGO_WATCH_HAS_MOTOR)
+ - FEATURE: synchronize date & time with computer during compile/upload
+ - FEATURE: screen for settings (with touch control - on/off display on, on/off tilt activation, on/off vibrations)
+ - REFACTORING: settings class for alwaysOn feature (instead alwaysOn boolean on DateTime component)
+ - REDESIGN: remove turning on "display always on" by PEKShort on date now controlling from PanelSettings app
+ - BUGFIX: avoid blinking when swipe to stopwatch screen
+
+cyberWatch 0.1
+========================
+ - shows splashscreen
+ - shows "exit screen"
+ - shows current time & date (include day of week)
+ - or multiple other watch faces
+ - shows battery capacity (with battery icon "progressbar")
+ - activate by touching display
+ - activate by shortpress pek
+ - activate by tilt up maneuver
+ - warn on baterry low/very low (vibrate / double vibrate), turn on display and render battery icon with red color
+ - show charging state (plug icon)
+ - turn off display and cpu goes light sleep on inactivity (battery savings) - wake up by display touch
+ - allows "display always on" functionality
+ - use CPU light sleep  200ms during main loop (energy saving)
+ - cpu frequency set to 40MHz (energy saving)
+ - wakeup (and vibrate) on USB / power connect / disconnect
+ - step counter
+ - horizontal swipe - switching betweenmainPanel components
+ - vertical swipe - control components
+ - simple calendar with horizontal swipe (prev/next month)
+ - simple stop watch
+

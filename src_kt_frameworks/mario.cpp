@@ -44,7 +44,7 @@ void Mario::update()
     // if vertical velocity and position match ground, reset
     if (vel[1] > 0.0 && y >= initialPosition[1])
     {
-        //custom_log("Jump is over, reset!\n");
+        custom_log("Jump is over, reset!\n");
         vel[1] = 0.0;
         acc[1] = 0.0;
         y = initialPosition[1];
@@ -53,7 +53,7 @@ void Mario::update()
 
     if (abs(vel[0]) > maxSpeed)
     {
-        //custom_log("Max speed!\n");
+        custom_log("Max speed!\n");
         vel[0] -= 0.05 * vel[0] / abs(vel[0]);
         acc[0] = 0.0f;
     }
@@ -119,12 +119,12 @@ void Mario::update()
             {
                 if (jumping)
                 {
-                    //custom_log("Skipping jump to %d, already jumping\n", targetX);
+                    custom_log("Skipping jump to %d, already jumping\n", targetX);
                     ++it;
                 }
                 else
                 {
-                    //custom_log("Time to jump to hit %d!\n", targetX);
+                    custom_log("Time to jump to hit %d!\n", targetX);
                     it = jumpTargets.erase(it);
                     vel[1] = jumpVel;
                     acc[1] = jumpAcc;
@@ -139,7 +139,7 @@ void Mario::update()
 
 void Mario::stopJump()
 {
-    //custom_log("Mario head hit something, better stop jumping!\n");
+    custom_log("Mario head hit something, better stop jumping!\n");
     vel[1] = 0.0;
 }
 
@@ -152,7 +152,7 @@ void Mario::jump(int targetX)
     }
     else
     {
-        //custom_log("Added jump target %d to list!\n", targetX);
+        custom_log("Added jump target %d to list!\n", targetX);
         jumpTargets.push_back(targetX);
     }
 }
@@ -176,7 +176,7 @@ void Mario::resetMario(lv_task_t *task)
 
 void Mario::run()
 {
-    //custom_log("Running!");
+    custom_log("Running!");
     enabledFrames = {1, 2, 3};
     running = true;
 }

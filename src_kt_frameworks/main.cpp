@@ -20,7 +20,6 @@
 
 #include "appAccel.h"
 #include "appBattery.h"
-#include "appJsat.h"
 #include "appKT.h"
 #include "appSetTime.h"
 #include "appTouch.h"
@@ -42,8 +41,8 @@ static uint8_t ss ;
 
 uint32_t targetTime = 0;       // for next 1-second display update
 uint32_t clockUpTime = 0;      // track the time the clock is displayed
-const int maxApp = 8; // number of apps
-String appName[maxApp] = {"Clock", "Battery", "Jupiter", "Accel", "SetTime","Touch", "Mario", "KT"}; // app names
+const int maxApp = 7; // number of apps
+String appName[maxApp] = {"Clock", "Battery", "Accel", "SetTime","Touch", "Mario", "KT"}; // app names
 
 void setMenuDisplay(int mSel) {
     int curSel = 0;
@@ -163,24 +162,21 @@ void loop()
                 appBattery::battery();
                 break;
             case 2:
-                appJsat::jSats();
-                break;
-            case 3:
                 appAccel::accel();
                 break;
-            case 4:
+            case 3:
                 appSetTime::setTime();
                 break;
-            case 5:
+            case 4:
                 appTouch::touch();
                 break;
-            case 6:
+            case 5:
                 marioLooper = true;
                 appMario::setupGUI();
                 custom_log(" ---> marioLooper: %4d\n", marioLooper);
                 appMario::marioLoop();
                 break;
-            case 7:
+            case 6:
                 ktLooper = true;
                 custom_log(" ---> ktLooper: %4d\n", ktLooper);
                 watch->tft->fillScreen(TFT_BLACK);
