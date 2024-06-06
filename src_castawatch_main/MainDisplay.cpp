@@ -1,4 +1,5 @@
 #include "config.h"
+#include "Arduino.h"
 #include "Functions.h"
 #include "CastaWatchCommon.h"
 #include "Alarms.h"
