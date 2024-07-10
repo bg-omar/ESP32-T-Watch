@@ -3,6 +3,9 @@
  * Created By Nikhil M Jeby
  * Github: https://github.com/solid-droid/Bubble-OS
 */
+#include <Arduino.h>
+#include <SD.h>
+
 #include ".\Assets\Wifi\wifi_0.h"
 #include ".\Assets\Wifi\wifi_1.h"
 #include ".\Assets\Wifi\wifi_2.h"

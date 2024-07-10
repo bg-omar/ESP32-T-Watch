@@ -215,7 +215,7 @@ void captura_touch() {
 
 ////////////////////
 
-void setup() {
+void setupBrightness() {
     Serial.begin(115200);
     ttgo = TTGOClass::getWatch();
     ttgo->begin();
@@ -235,7 +235,7 @@ void setup() {
 }
 
 
-void loop() {
+void loopBrightness() {
     captura_touch();
     if (brillo != 0) {
         ttgo->tft->setTextColor(TFT_GREEN, TFT_BLACK);

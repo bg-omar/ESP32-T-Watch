@@ -1,4 +1,5 @@
 #include "config.h"
+#include "Ticker.h"
 #include "AudioFileSourcePROGMEM.h"
 #include "AudioFileSourceID3.h"
 #include "AudioGeneratorMP3.h"
